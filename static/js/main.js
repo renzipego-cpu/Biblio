@@ -40,11 +40,13 @@ overlay?.addEventListener('click', cerrar);
 
 // Volver arriba
 const botonArriba = document.getElementById('volver-arriba');
-window.addEventListener('scroll', () => {
-    botonArriba.hidden = window.scrollY < 400;
-});
-botonArriba?.addEventListener('click', () =>
-    window.scrollTo({ top: 0, behavior: 'smooth' }));
+if (botonArriba) {
+    window.addEventListener('scroll', () => {
+        botonArriba.hidden = window.scrollY < 400;
+    });
+    botonArriba.addEventListener('click', () =>
+        window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
 
 // Ver / ocultar contraseña
 document.querySelectorAll('.campo-password').forEach((campo) => {
@@ -71,6 +73,11 @@ document.querySelectorAll('.btn-copiar').forEach((boton) => {
         setTimeout(() => { boton.innerHTML = textoOriginal; }, 1500);
     });
 });
+
+// PWA: registrar el service worker (solo en HTTPS, no en desarrollo local)
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+}
 
 // Confirmaciones
 document.querySelectorAll('form[data-confirmar]').forEach((form) => {

@@ -66,4 +66,32 @@
         </a>
     </div>
 </div>
+
+{% if recomendaciones %}
+<section class="seccion" style="margin-top:32px">
+    <div class="seccion-header">
+        <h2><i data-lucide="sparkles"></i> Te puede interesar</h2>
+    </div>
+    <div class="grid">
+        {% for r in recomendaciones %}
+        <div class="card">
+            <div class="card-portada" style="background: {{ r.color }}" role="img" aria-label="Portada de {{ r.titulo }}">
+                <i data-lucide="{{ icono_tipo.get(r.tipo, 'package') }}"></i>
+            </div>
+            <div class="card-body">
+                <a class="card-titulo" href="{{ url_for('detalle', item_id=r.id) }}">{{ r.titulo }}</a>
+                <p class="card-autor">{{ r.autor }}</p>
+                <span class="estado disponible"><i data-lucide="check-circle-2"></i> Disponible</span>
+                {% if usuario %}
+                <form class="js-solicitar" action="{{ url_for('solicitar', item_id=r.id) }}" method="post"
+                      data-titulo="{{ r.titulo }}" data-max="{{ r.stock|default(1) }}">
+                    <button class="btn btn-dark btn-full" type="submit"><i data-lucide="shopping-basket"></i> Solicitar</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

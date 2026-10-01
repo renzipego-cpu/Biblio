@@ -5,8 +5,42 @@
 <h1>Panel de administración</h1>
 <div class="seccion"></div>
 
-<section class="seccion">
-    <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i data-lucide="package"></i> Pedidos</h2>
+{% if vencidos %}
+<section class="seccion" id="vencidos">
+    <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <i data-lucide="bell-ring"></i> Pedidos vencidos ({{ vencidos|length }})
+    </h2>
+    <div class="tabla-scroll"><table class="tabla tabla-vencidos">
+        <thead>
+            <tr><th>Alumno</th><th>DNI</th><th>Elemento</th><th>Cant.</th><th>Venció el</th></tr>
+        </thead>
+        <tbody>
+            {% for v in vencidos %}
+            <tr>
+                <td>{{ v.nombre }}</td>
+                <td>{{ v.dni }}</td>
+                <td>{{ v.pedido.item_titulo }}</td>
+                <td>{{ v.pedido.cantidad|default(1) }}</td>
+                <td>{{ v.pedido.fecha_devolucion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table></div>
+</section>
+{% endif %}
+
+<section class="seccion" id="pedidos">
+    <div class="seccion-header admin-header">
+        <h2 style="display:flex;align-items:center;gap:10px"><i data-lucide="package"></i> Pedidos</h2>
+        <div class="admin-acciones">
+            <form class="filtros-avanzados sin-margen" method="get" action="{{ url_for('admin') }}">
+                <input type="text" name="q" value="{{ q or '' }}" placeholder="Buscar por DNI, alumno o elemento">
+                <button class="btn btn-outline" type="submit"><i data-lucide="search"></i> Buscar</button>
+                {% if q %}<a class="btn btn-outline" href="{{ url_for('admin') }}">Limpiar</a>{% endif %}
+            </form>
+            <a class="btn btn-outline" href="{{ url_for('admin_estadisticas') }}"><i data-lucide="bar-chart-3"></i> Estadísticas</a>
+        </div>
+    </div>
     <div class="tabla-scroll"><table class="tabla">
         <thead>
             <tr><th>#</th><th>Fecha</th><th>Elemento</th><th>Cant.</th><th>Nombre</th><th>DNI</th><th>N° inventario</th><th>Devolución</th><th>Estado</th><th>Cambiar estado</th></tr>
@@ -77,7 +111,16 @@
                 <td>{{ i.tipo }}</td>
                 <td>{{ i.titulo }}</td>
                 <td>{{ i.autor }}</td>
-                <td>{{ i.stock|default(1) }}</td>
+                <td>
+                    <div class="celda-stock">
+                        <span>{{ i.stock|default(1) }}</span>
+                        <form class="form-stock" action="{{ url_for('admin_stock', item_id=i.id) }}" method="post">
+                            <input type="number" name="stock" min="0" value="{{ i.stock|default(1) }}"
+                                   aria-label="Nuevo stock de {{ i.titulo }}">
+                            <button class="btn btn-outline" type="submit" title="Guardar stock"><i data-lucide="save"></i></button>
+                        </form>
+                    </div>
+                </td>
                 <td>{{ 'Sí' if i.disponible else 'No' }}</td>
                 <td>
                     <form action="{{ url_for('admin_eliminar_item', item_id=i.id) }}" method="post"

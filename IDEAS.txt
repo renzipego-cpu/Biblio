@@ -1,5 +1,5 @@
 IDEAS DE MEJORA — Biblioteca Escolar
-Última actualización: 30/09/2026
+Última actualización: 01/10/2026
 
 Leyenda: [HECHA] = ya está implementada · [PENDIENTE] = por hacer
 
@@ -23,19 +23,22 @@ Leyenda: [HECHA] = ya está implementada · [PENDIENTE] = por hacer
 6. [HECHA]    Reservas / cola de espera: si algo está prestado, lo
               reservás y te llega una notificación cuando se libera.
               Página propia "Mis reservas" con cancelación.
-7. [HECHA]    Favoritos: estrella en las tarjetas y en el detalle,
+7. [HECHA]    Favoritos: estrella en la página de detalle (las tarjetas
+              quedaron limpias con el botón a ancho completo),
               más página "Mis favoritos".
 8. [PENDIENTE] Valoraciones con estrellas (1-5) al devolver.
                A definir con la escuela (moderación, permisos).
 9. [HECHA]    Búsqueda avanzada en el catálogo: filtro por género y
-              orden por título, año o disponibilidad.
+              orden por título, año o disponibilidad. Además la
+              búsqueda ignora tildes y mayúsculas ("matematica"
+              encuentra "Matemática").
 
 == Para el admin (bibliotecaria) =====================================
 
-10. [PENDIENTE] Panel con estadísticas: lo más pedido del mes, usuarios
-                más activos, vencidos. Evaluar permisos de la escuela.
-11. [PENDIENTE] Búsqueda de alumno por DNI al entregar, sin entrar al
-                panel completo.
+10. [HECHA]    Panel de estadísticas: totales, vencidos, los 5 más
+               pedidos y pedidos por mes con barras (/admin/estadisticas).
+11. [HECHA]    Búsqueda de alumno por DNI: en el panel admin (buscador
+               de pedidos) y en el modo kiosco del mostrador.
 12. [PENDIENTE] Exportar pedidos a CSV/Excel para reportes del colegio.
 13. [PENDIENTE] Carnet de socio imprimible / con QR.
 
@@ -45,3 +48,35 @@ Leyenda: [HECHA] = ya está implementada · [PENDIENTE] = por hacer
                pasos, horarios de atención y botón de registro claro.
 15. [HECHA]    Sección "¿Cómo funciona" desde la landing.
 16. [HECHA]    README.md con guía de instalación y uso.
+
+== Nuevas ideas (01/10/2026) =========================================
+
+-- Para los alumnos --
+
+17. [HECHA]    Historial "Mi recorrido": todos los pedidos con contadores
+                (total, este año, libros, equipos, materiales).
+18. [HECHA]    Recomendaciones en el detalle: "Te puede interesar",
+                hasta 3 elementos del mismo género que estén disponibles.
+19. [HECHA]    Búsqueda por palabras sueltas y sin tildes: "cien soledad"
+                o "introduccion python" encuentran aunque no esté escrito
+                así. También busca en la descripción del elemento.
+
+-- Para la bibliotecaria --
+
+20. [HECHA]    Recordatorio de vencidos: sección en el panel admin y en
+                el modo kiosco, con botón de copiar el detalle.
+21. [HECHA]    Ajustar stock rápido: campo de stock editable directo en
+                la tabla de inventario, sin borrar el elemento.
+22. [HECHA]    Buscar pedidos por DNI o nombre del alumno desde el panel.
+23. [PENDIENTE] Bloquear alumnos morosos: quien tiene algo vencido no
+                puede pedir más hasta devolver.
+
+-- Para lucir en la entrega --
+
+24. [HECHA]    Panel de estadísticas con barras: los 5 más pedidos y
+                pedidos por mes (/admin/estadisticas).
+25. [HECHA]    Modo kiosco (/mostrador): pantalla grande para la compu
+                del mostrador con 3 botones gigantes (Entregar, Devolver,
+                Vencidos) y búsqueda por DNI o nombre.
+26. [HECHA]    PWA básica: manifest + service worker + ícono, se puede
+                "instalar" desde el celu como una app.

@@ -1,0 +1,17 @@
+{
+  "name": "Biblioteca Escolar",
+  "short_name": "Biblioteca",
+  "description": "Sistema de prestamos de la biblioteca escolar",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2ede4",
+  "theme_color": "#3b2f25",
+  "icons": [
+    {
+      "src": "/static/img/icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -124,6 +124,25 @@ def liberar_item(datos, item_id, cantidad):
                   f'Se liberó "{item["titulo"]}": tu reserva está lista, podés solicitarla ahora.')
 
 
+def pedidos_vencidos(datos):
+    """Pedidos entregados cuya fecha de devolución ya pasó."""
+    hoy = date.today()
+    usuarios = {u["id"]: u for u in datos["usuarios"]}
+    vencidos = []
+    for p in datos["pedidos"]:
+        if p["estado"] != "Entregado" or not p.get("fecha_devolucion"):
+            continue
+        try:
+            d, m, a = (int(x) for x in p["fecha_devolucion"].split("/"))
+            if hoy > date(a, m, d):
+                u = usuarios.get(p["usuario_id"], {})
+                vencidos.append({"pedido": p, "nombre": u.get("nombre", "-"),
+                                 "dni": u.get("dni", "-")})
+        except (ValueError, TypeError):
+            continue
+    return vencidos
+
+
 def usuario_actual():
     if "usuario_id" not in session:
         return None
@@ -202,12 +221,20 @@ def catalogo():
     if tipo != "todos":
         items = [i for i in items if i["tipo"] == tipo]
     if genero:
-        items = [i for i in items if i.get("genero") == genero]
-    if q:
-        q_norm = normalizar_texto(q)
+        genero_norm = normalizar_texto(genero)
         items = [i for i in items
-                 if q_norm in normalizar_texto(i["titulo"])
-                 or q_norm in normalizar_texto(i["autor"])]
+                 if normalizar_texto(i.get("genero") or "") == genero_norm]
+    if q:
+        # Búsqueda por palabras sueltas: tienen que aparecer todas,
+        # sin importar el orden ni las tildes, en título, autor o descripción
+        palabras = normalizar_texto(q).split()
+
+        def texto_busqueda(i):
+            return normalizar_texto(
+                f'{i["titulo"]} {i["autor"]} {i.get("descripcion") or ""}')
+
+        items = [i for i in items
+                 if all(p in texto_busqueda(i) for p in palabras)]
     if orden == "disponibilidad":
         items = sorted(items, key=lambda i: not i["disponible"])
     elif orden == "anio":
@@ -241,6 +268,11 @@ def detalle(item_id):
                       if r["item_id"] == item_id and r["usuario_id"] == uid),
         ocupacion=[p for p in datos["pedidos"]
                    if p["item_id"] == item_id and p["estado"] == "Entregado"],
+        recomendaciones=[i for i in datos["items"]
+                         if i["id"] != item_id
+                         and normalizar_texto(i.get("genero") or "")
+                         == normalizar_texto(item.get("genero") or "")
+                         and i["disponible"]][:3],
     )
 
 
@@ -452,6 +484,25 @@ def calendario():
     )
 
 
+@app.route("/recorrido")
+@login_requerido
+def recorrido():
+    datos = cargar_datos()
+    pedidos = [dict(p) for p in datos["pedidos"]
+               if p["usuario_id"] == session["usuario_id"]]
+    este_anio = str(date.today().year)
+    return render_template(
+        "recorrido.html",
+        pedidos=list(reversed(pedidos)),
+        total=len(pedidos),
+        libros=sum(1 for p in pedidos if p["item_tipo"] == "libro"),
+        equipos=sum(1 for p in pedidos
+                    if p["item_tipo"] in ("proyector", "equipo", "audiovisual")),
+        materiales=sum(1 for p in pedidos if p["item_tipo"] == "material"),
+        este_anio=sum(1 for p in pedidos if p["fecha"].endswith(este_anio)),
+    )
+
+
 @app.route("/mis-pedidos")
 @login_requerido
 def mis_pedidos():
@@ -589,9 +640,104 @@ def cuenta():
 @admin_requerido
 def admin():
     datos = cargar_datos()
+    q = request.args.get("q", "").strip().lower()
+    usuarios_map = {u["id"]: u for u in datos["usuarios"]}
+
+    pedidos = datos["pedidos"]
+    if q:
+        def coincide(p):
+            u = usuarios_map.get(p["usuario_id"], {})
+            return (q in p["item_titulo"].lower()
+                    or q in u.get("nombre", "").lower()
+                    or q in u.get("dni", "").lower())
+        pedidos = [p for p in pedidos if coincide(p)]
+
     return render_template("admin.html", items=datos["items"],
-                           pedidos=datos["pedidos"],
-                           usuarios=datos["usuarios"])
+                           pedidos=pedidos,
+                           usuarios=datos["usuarios"],
+                           vencidos=pedidos_vencidos(datos), q=q)
+
+
+@app.route("/admin/estadisticas")
+@admin_requerido
+def admin_estadisticas():
+    from collections import Counter
+    datos = cargar_datos()
+    pedidos = datos["pedidos"]
+
+    top_items = Counter(p["item_titulo"] for p in pedidos).most_common(5)
+    max_top = top_items[0][1] if top_items else 1
+
+    conteo_mes = Counter()
+    for p in pedidos:
+        partes = p["fecha"].split("/")
+        if len(partes) == 3:
+            conteo_mes[f"{partes[2]}/{partes[1]}"] += 1
+    meses = sorted(conteo_mes.items())[-6:]
+    max_mes = max((c for _, c in meses), default=1)
+
+    return render_template(
+        "estadisticas.html",
+        total_pedidos=len(pedidos),
+        total_usuarios=len(datos["usuarios"]),
+        total_items=len(datos["items"]),
+        total_vencidos=len(pedidos_vencidos(datos)),
+        top_items=top_items, max_top=max_top,
+        meses=meses, max_mes=max_mes,
+    )
+
+
+@app.route("/admin/item/stock/<int:item_id>", methods=["POST"])
+@admin_requerido
+def admin_stock(item_id):
+    datos = cargar_datos()
+    item = next((i for i in datos["items"] if i["id"] == item_id), None)
+    if not item:
+        abort(404)
+    try:
+        nuevo = int(request.form.get("stock", ""))
+    except ValueError:
+        flash("El stock tiene que ser un número.", "error")
+        return redirect(url_for("admin"))
+    if nuevo < 0:
+        flash("El stock no puede ser negativo.", "error")
+        return redirect(url_for("admin"))
+    item["stock"] = nuevo
+    item["disponible"] = nuevo > 0
+    guardar_datos(datos)
+    flash(f'Stock de "{item["titulo"]}" actualizado a {nuevo}.', "ok")
+    return redirect(url_for("admin"))
+
+
+# ---------------- Mostrador (modo kiosco) ----------------
+@app.route("/mostrador")
+@admin_requerido
+def mostrador():
+    datos = cargar_datos()
+    accion = request.args.get("accion", "menu")
+    buscar = request.args.get("buscar", "").strip().lower()
+    resultados = []
+
+    if accion in ("entregar", "devolver") and buscar:
+        estado_buscado = "En proceso" if accion == "entregar" else "Entregado"
+        for u in datos["usuarios"]:
+            if not (buscar in u["nombre"].lower()
+                    or buscar in u.get("dni", "").lower()):
+                continue
+            pedidos = [p for p in datos["pedidos"]
+                       if p["usuario_id"] == u["id"]
+                       and p["estado"] == estado_buscado]
+            if pedidos:
+                resultados.append({"usuario": u, "pedidos": pedidos})
+
+    return render_template(
+        "mostrador.html",
+        accion=accion, buscar=buscar, resultados=resultados,
+        vencidos=pedidos_vencidos(datos) if accion == "vencidos" else [],
+        vencidos_total=len(pedidos_vencidos(datos)),
+        hoy=date.today().strftime("%d/%m/%Y"),
+        fecha_default=(date.today() + timedelta(days=DIAS_PRESTAMO)).strftime("%Y-%m-%d"),
+    )
 
 
 @app.route("/admin/item/nuevo", methods=["POST"])

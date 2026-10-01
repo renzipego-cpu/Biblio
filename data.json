@@ -24,7 +24,7 @@
       "portada": "◉",
       "color": "#2b2b2b",
       "stock": 3,
-      "genero": "Ficci?n dist?pica",
+      "genero": "Ficción distópica",
       "anio": 1949,
       "sinopsis": "Novela distópica sobre un régimen totalitario."
     },
@@ -38,7 +38,7 @@
       "portada": "✧",
       "color": "#1d3557",
       "stock": 3,
-      "genero": "F?bula",
+      "genero": "Fábula",
       "anio": 1943,
       "sinopsis": "Clásico sobre la amistad y la imaginación."
     },
@@ -80,7 +80,7 @@
       "portada": "{ }",
       "color": "#2d6a4f",
       "stock": 3,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2019,
       "sinopsis": "Programación con Python para principiantes."
     },
@@ -108,7 +108,7 @@
       "portada": "📽️",
       "color": "#f5f2ec",
       "stock": 3,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2023,
       "sinopsis": "Proyector XGA, resolución 1024x768."
     },
@@ -122,7 +122,7 @@
       "portada": "📽️",
       "color": "#f5f2ec",
       "stock": 3,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2023,
       "sinopsis": "Proyector SVGA para aulas."
     },
@@ -136,7 +136,7 @@
       "portada": "📽️",
       "color": "#f5f2ec",
       "stock": 3,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2023,
       "sinopsis": "Proyector SVGA con alto contraste."
     },
@@ -150,7 +150,7 @@
       "portada": "📽️",
       "color": "#f5f2ec",
       "stock": 0,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2023,
       "sinopsis": "Proyector WXGA para salas grandes."
     },
@@ -276,7 +276,7 @@
       "portada": "💻",
       "color": "#333",
       "stock": 3,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2023,
       "sinopsis": "Notebook para clases y exposiciones."
     },
@@ -290,7 +290,7 @@
       "portada": "🔦",
       "color": "#555",
       "stock": 3,
-      "genero": "Tecnolog?a",
+      "genero": "Tecnología",
       "anio": 2023,
       "sinopsis": "Puntero para presentaciones."
     },

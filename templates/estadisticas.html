@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block titulo %}Estadísticas · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li><a href="{{ url_for('admin') }}">Administración</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">Estadísticas</li>
+    </ol>
+</nav>
+<h1>Estadísticas</h1>
+<div class="seccion"></div>
+
+<div class="stats-cards">
+    <div class="stat-card">
+        <strong class="stat-num">{{ total_pedidos }}</strong>
+        <span>Pedidos históricos</span>
+    </div>
+    <div class="stat-card">
+        <strong class="stat-num">{{ total_usuarios }}</strong>
+        <span>Usuarios registrados</span>
+    </div>
+    <div class="stat-card">
+        <strong class="stat-num">{{ total_items }}</strong>
+        <span>Elementos en catálogo</span>
+    </div>
+    <div class="stat-card {{ 'stat-alerta' if total_vencidos }}">
+        <strong class="stat-num">{{ total_vencidos }}</strong>
+        <span>Pedidos vencidos</span>
+    </div>
+</div>
+
+<section class="seccion">
+    <div class="seccion-header">
+        <h2><i data-lucide="bar-chart-3"></i> Los 5 más pedidos</h2>
+    </div>
+    {% for titulo, cantidad in top_items %}
+    <div class="barra-fila">
+        <span class="barra-etiqueta">{{ titulo }}</span>
+        <div class="barra-pista">
+            <div class="barra" style="width: {{ (cantidad / max_top * 100)|round|int }}%"></div>
+        </div>
+        <span class="barra-num">{{ cantidad }}</span>
+    </div>
+    {% else %}
+    <p class="vacio">Todavía no hay pedidos para mostrar.</p>
+    {% endfor %}
+</section>
+
+<section class="seccion">
+    <div class="seccion-header">
+        <h2><i data-lucide="calendar-range"></i> Pedidos por mes (últimos 6)</h2>
+    </div>
+    {% for mes, cantidad in meses %}
+    <div class="barra-fila">
+        <span class="barra-etiqueta">{{ mes }}</span>
+        <div class="barra-pista">
+            <div class="barra barra-2" style="width: {{ (cantidad / max_mes * 100)|round|int }}%"></div>
+        </div>
+        <span class="barra-num">{{ cantidad }}</span>
+    </div>
+    {% else %}
+    <p class="vacio">Todavía no hay pedidos para mostrar.</p>
+    {% endfor %}
+</section>
+
+<a class="btn btn-outline" href="{{ url_for('admin') }}"><i data-lucide="arrow-left"></i> Volver al panel</a>
+{% endblock %}

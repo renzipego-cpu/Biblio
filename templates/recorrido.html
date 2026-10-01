@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Mi recorrido · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">Mi recorrido</li>
+    </ol>
+</nav>
+<h1>Mi recorrido</h1>
+<p class="vacio" style="padding:4px 0 16px">Todo lo que pediste en la biblioteca, de nuevo a viejo.</p>
+
+<div class="stats-cards">
+    <div class="stat-card">
+        <strong class="stat-num">{{ total }}</strong>
+        <span>Pedidos en total</span>
+    </div>
+    <div class="stat-card">
+        <strong class="stat-num">{{ este_anio }}</strong>
+        <span>Este año</span>
+    </div>
+    <div class="stat-card">
+        <strong class="stat-num">{{ libros }}</strong>
+        <span>Libros</span>
+    </div>
+    <div class="stat-card">
+        <strong class="stat-num">{{ equipos }}</strong>
+        <span>Equipos y proyectores</span>
+    </div>
+    <div class="stat-card">
+        <strong class="stat-num">{{ materiales }}</strong>
+        <span>Materiales</span>
+    </div>
+</div>
+
+<div class="tabla-scroll">
+<table class="tabla">
+    <thead>
+        <tr><th>Fecha</th><th>Elemento</th><th>Cantidad</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+        {% for p in pedidos %}
+        <tr>
+            <td>{{ p.fecha }}</td>
+            <td>{{ p.item_titulo }}</td>
+            <td>{{ p.cantidad|default(1) }}</td>
+            <td><span class="badge badge-{{ p.estado|lower|replace(' ', '-') }}">{{ p.estado }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="vacio">Todavía no pediste nada. ¡Andá al <a href="{{ url_for('catalogo') }}">catálogo</a> y empezá!</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

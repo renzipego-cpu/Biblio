@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mostrador · Biblioteca Escolar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        if (localStorage.getItem('tema') === 'oscuro') {
+            document.documentElement.dataset.tema = 'oscuro';
+        }
+    </script>
+</head>
+<body data-csrf="{{ csrf_token }}">
+<div class="modo-kiosco">
+    <header class="k-cabecera">
+        <h1><i data-lucide="library"></i> Mostrador de la biblioteca</h1>
+        <div class="k-cabecera-datos">
+            <span>{{ hoy }}</span>
+            <a href="{{ url_for('admin') }}">Panel completo</a>
+        </div>
+    </header>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in mensajes %}
+        <div class="flash flash-{{ cat }}" role="alert">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    {% if accion == 'menu' %}
+    <div class="k-botones">
+        <a class="k-boton" href="{{ url_for('mostrador', accion='entregar') }}">
+            <i data-lucide="package-check"></i>
+            Entregar
+        </a>
+        <a class="k-boton" href="{{ url_for('mostrador', accion='devolver') }}">
+            <i data-lucide="undo-2"></i>
+            Devolver
+        </a>
+        <a class="k-boton {{ 'k-alerta' if vencidos_total }}" href="{{ url_for('mostrador', accion='vencidos') }}">
+            <i data-lucide="bell-ring"></i>
+            Vencidos{% if vencidos_total %} ({{ vencidos_total }}){% endif %}
+        </a>
+    </div>
+
+    {% elif accion in ('entregar', 'devolver') %}
+    <a class="k-volver" href="{{ url_for('mostrador') }}"><i data-lucide="arrow-left"></i> Menú</a>
+    <form class="k-buscar" method="get" action="{{ url_for('mostrador') }}">
+        <input type="hidden" name="accion" value="{{ accion }}">
+        <input type="text" name="buscar" value="{{ buscar }}" placeholder="DNI o nombre del alumno" autofocus>
+        <button class="btn btn-dark" type="submit"><i data-lucide="search"></i> Buscar</button>
+    </form>
+
+    {% if buscar %}
+    {% for r in resultados %}
+    <div class="k-usuario">
+        <div class="k-usuario-datos">
+            <strong>{{ r.usuario.nombre }}</strong>
+            <span>DNI {{ r.usuario.dni }}</span>
+        </div>
+        {% for p in r.pedidos %}
+        {% if accion == 'entregar' %}
+        <form class="k-pedido" action="{{ url_for('admin_estado_pedido', pedido_id=p.id) }}" method="post">
+            <div class="k-pedido-titulo">
+                <strong>{{ p.item_titulo }}</strong>
+                <span>x{{ p.cantidad|default(1) }} · pedido {{ p.fecha }}</span>
+            </div>
+            <input type="text" name="inventario" placeholder="N° inventario" required>
+            <input type="date" name="fecha_devolucion" value="{{ fecha_default }}"
+                   title="Fecha de devolución">
+            <input type="hidden" name="estado" value="Entregado">
+            <button class="btn k-btn-accion" type="submit"><i data-lucide="check"></i> Entregar</button>
+        </form>
+        {% else %}
+        <form class="k-pedido" action="{{ url_for('admin_estado_pedido', pedido_id=p.id) }}" method="post">
+            <div class="k-pedido-titulo">
+                <strong>{{ p.item_titulo }}</strong>
+                <span>x{{ p.cantidad|default(1) }} · vence {{ p.fecha_devolucion or 'sin fecha' }}</span>
+            </div>
+            <input type="hidden" name="estado" value="Devuelto">
+            <button class="btn k-btn-accion" type="submit"><i data-lucide="undo-2"></i> Recibir devolución</button>
+        </form>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="k-vacio">No encontramos pedidos "{{ 'En proceso' if accion == 'entregar' else 'Entregados' }}" para esa búsqueda.</p>
+    {% endfor %}
+    {% endif %}
+
+    {% elif accion == 'vencidos' %}
+    <a class="k-volver" href="{{ url_for('mostrador') }}"><i data-lucide="arrow-left"></i> Menú</a>
+    <h2 class="k-subtitulo">Pedidos vencidos ({{ vencidos|length }})</h2>
+    {% for v in vencidos %}
+    <div class="k-vencido">
+        <div>
+            <strong>{{ v.nombre }}</strong> — DNI {{ v.dni }}<br>
+            {{ v.pedido.item_titulo }} · venció el {{ v.pedido.fecha_devolucion }}
+        </div>
+        <button class="btn btn-outline btn-copiar" data-copiar="{{ v.nombre }} (DNI {{ v.dni }}): devolver '{{ v.pedido.item_titulo }}', venció el {{ v.pedido.fecha_devolucion }}">
+            <i data-lucide="copy"></i> Copiar
+        </button>
+    </div>
+    {% else %}
+    <p class="k-vacio">¡Sin vencidos! Todo al día.</p>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

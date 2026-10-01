@@ -37,7 +37,7 @@
 </div>
 
 <form class="filtros-avanzados" action="{{ url_for('catalogo') }}" method="get">
-    <input type="text" name="q" value="{{ q }}" placeholder="Título o autor" aria-label="Buscar por título o autor">
+    <input type="text" name="q" value="{{ q }}" placeholder="Título, autor o tema" aria-label="Buscar por título, autor o tema">
     {% if tipo != 'todos' %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
     <select name="genero" aria-label="Filtrar por género">
         <option value="">Todos los géneros</option>
