@@ -1,15 +1,15 @@
 ﻿{% extends "base.html" %}
-{% block titulo %}AdministraciÃ³n Â· Biblioteca Escolar{% endblock %}
+{% block titulo %}Administración · Biblioteca Escolar{% endblock %}
 
 {% block contenido %}
-<h1>Panel de administraciÃ³n</h1>
+<h1>Panel de administración</h1>
 <div class="seccion"></div>
 
 <section class="seccion">
     <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i data-lucide="package"></i> Pedidos</h2>
     <div class="tabla-scroll"><table class="tabla">
         <thead>
-            <tr><th>#</th><th>Fecha</th><th>Elemento</th><th>Cant.</th><th>Nombre</th><th>DNI</th><th>NÂ° inventario</th><th>DevoluciÃ³n</th><th>Estado</th><th>Cambiar estado</th></tr>
+            <tr><th>#</th><th>Fecha</th><th>Elemento</th><th>Cant.</th><th>Nombre</th><th>DNI</th><th>N° inventario</th><th>Devolución</th><th>Estado</th><th>Cambiar estado</th></tr>
         </thead>
         <tbody>
             {% for p in pedidos %}
@@ -21,16 +21,16 @@
                 <td>{{ p.cantidad|default(1) }}</td>
                 <td>{{ u.nombre if u else '-' }}</td>
                 <td>{{ u.dni if u else '-' }}</td>
-                <td>{{ p.inventario or 'â€”' }}</td>
-                <td>{{ p.fecha_devolucion or 'â€”' }}</td>
+                <td>{{ p.inventario or '—' }}</td>
+                <td>{{ p.fecha_devolucion or '—' }}</td>
                 <td><span class="badge badge-{{ p.estado|lower|replace(' ', '-') }}">{{ p.estado }}</span></td>
                 <td>
                     <form class="form-inline" action="{{ url_for('admin_estado_pedido', pedido_id=p.id) }}" method="post">
-                        <input type="text" name="inventario" placeholder="NÂ° inventario"
+                        <input type="text" name="inventario" placeholder="N° inventario"
                                value="{{ p.inventario or '' }}" class="input-inventario"
                                title="Obligatorio para entregar">
                         <input type="date" name="fecha_devolucion" class="input-inventario"
-                               title="Fecha de devoluciÃ³n (opcional; por defecto 7 dÃ­as)">
+                               title="Fecha de devolución (opcional; por defecto 7 días)">
                         <select name="estado">
                             {% for e in ['En proceso', 'Entregado', 'Devuelto', 'Cancelado'] %}
                             <option value="{{ e }}" {{ 'selected' if p.estado == e }}>{{ e }}</option>
@@ -50,11 +50,11 @@
 <section class="seccion">
     <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i data-lucide="library"></i> Inventario</h2>
     <form class="form-item" action="{{ url_for('admin_nuevo_item') }}" method="post">
-        <input type="text" name="titulo" placeholder="TÃ­tulo" required>
+        <input type="text" name="titulo" placeholder="Título" required>
         <input type="text" name="autor" placeholder="Autor / detalle">
-        <input type="text" name="descripcion" placeholder="DescripciÃ³n">
-        <input type="text" name="genero" placeholder="GÃ©nero" style="width:130px">
-        <input type="number" name="anio" placeholder="AÃ±o" min="1900" max="2100" style="width:90px">
+        <input type="text" name="descripcion" placeholder="Descripción">
+        <input type="text" name="genero" placeholder="Género" style="width:130px">
+        <input type="number" name="anio" placeholder="Año" min="1900" max="2100" style="width:90px">
         <input type="number" name="stock" placeholder="Stock" value="1" min="1" style="width:90px">
         <select name="tipo">
             <option value="libro">Libro</option>
@@ -68,7 +68,7 @@
     </form>
     <div class="tabla-scroll"><table class="tabla">
         <thead>
-            <tr><th>#</th><th>Tipo</th><th>TÃ­tulo</th><th>Autor</th><th>Stock</th><th>Disponible</th><th></th></tr>
+            <tr><th>#</th><th>Tipo</th><th>Título</th><th>Autor</th><th>Stock</th><th>Disponible</th><th></th></tr>
         </thead>
         <tbody>
             {% for i in items %}
@@ -78,10 +78,10 @@
                 <td>{{ i.titulo }}</td>
                 <td>{{ i.autor }}</td>
                 <td>{{ i.stock|default(1) }}</td>
-                <td>{{ 'SÃ­' if i.disponible else 'No' }}</td>
+                <td>{{ 'Sí' if i.disponible else 'No' }}</td>
                 <td>
                     <form action="{{ url_for('admin_eliminar_item', item_id=i.id) }}" method="post"
-                          data-confirmar="Â¿Eliminar {{ i.titulo }} del inventario?">
+                          data-confirmar="¿Eliminar {{ i.titulo }} del inventario?">
                         <button class="btn btn-outline" type="submit">Eliminar</button>
                     </form>
                 </td>
@@ -102,8 +102,8 @@
                 <td>{{ u.nombre }}</td>
                 <td>{{ u.dni }}</td>
                 <td>{{ u.email }}</td>
-                <td>{{ 'SÃ­' if u.socio else 'No' }}</td>
-                <td>{{ 'SÃ­' if u.admin else 'No' }}</td>
+                <td>{{ 'Sí' if u.socio else 'No' }}</td>
+                <td>{{ 'Sí' if u.admin else 'No' }}</td>
             </tr>
             {% endfor %}
         </tbody>
