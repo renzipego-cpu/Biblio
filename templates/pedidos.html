@@ -4,6 +4,7 @@
 {% block contenido %}
 <h1>Mis pedidos</h1>
 <div class="seccion"></div>
+<div class="tabla-scroll">
 <table class="tabla">
     <thead>
         <tr><th>Fecha</th><th>Elemento</th><th>Tipo</th><th>Cantidad</th><th>N° inventario</th><th>Devolución</th><th>Estado</th><th></th></tr>
@@ -37,4 +38,5 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% endblock %}

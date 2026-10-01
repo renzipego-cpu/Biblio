@@ -47,6 +47,10 @@ html[data-tema="oscuro"] {
 /* ================= Base ================= */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Regla de oro: el atributo hidden SIEMPRE oculta. Sin esto, el overlay
+   del menú móvil quedaba visible en celulares y bloqueaba toda la pantalla */
+[hidden] { display: none !important; }
+
 body {
     font-family: var(--fuente-texto);
     font-size: 1rem;
@@ -504,6 +508,10 @@ html[data-tema="oscuro"] .card:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35
     overflow: hidden;
     font-size: 0.9rem;
 }
+/* Contenedor con scroll horizontal: en pantallas chicas (netbooks
+   Conectar Igualdad) la tabla se desliza en vez de romper el diseño */
+.tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tabla-scroll .tabla { min-width: 640px; }
 .tabla th, .tabla td { padding: 10px 14px; text-align: left; }
 .tabla th { background: var(--fondo); font-weight: 600; }
 .tabla tr + tr td { border-top: 1px solid var(--borde); }
@@ -519,7 +527,6 @@ html[data-tema="oscuro"] .card:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35
 
 /* ================= Modal cantidad ================= */
 .modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; }
-.modal[hidden] { display: none; }
 .modal-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
 .modal-caja {
     position: relative;
@@ -741,4 +748,17 @@ details.faq-item p { margin-top: 10px; color: var(--texto-suave); }
     .sidebar-abrir { display: inline-flex; }
     .detalle { flex-direction: column; }
     .topbar .btn span { display: none; }
+}
+
+/* Laptops de pantalla corta (Conectar Igualdad y similares):
+   tablas y formularios más compactos para que entre todo */
+@media (max-height: 820px) {
+    .tabla th, .tabla td { padding: 6px 10px; font-size: 0.84rem; }
+    .form-inline select, .form-inline .input-inventario { font-size: 0.8rem; padding: 5px 8px; }
+    .form-inline .btn { font-size: 0.8rem; padding: 6px 10px; }
+    .form-item input, .form-item select { padding: 8px 10px; font-size: 0.84rem; }
+    .auth-box { padding: 24px; margin: 24px auto; }
+    .main { padding: 14px 18px; }
+    .topbar { margin-bottom: 14px; }
+    .bienvenido { padding: 22px; }
 }

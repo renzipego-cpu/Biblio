@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% block titulo %}Mis reservas · Biblioteca Escolar{% endblock %}
+﻿{% extends "base.html" %}
+{% block titulo %}Mis reservas Â· Biblioteca Escolar{% endblock %}
 
 {% block contenido %}
 <nav aria-label="Migas de pan">
@@ -12,9 +12,9 @@
 <h1>Mis reservas</h1>
 <div class="seccion"></div>
 
-<table class="tabla">
+<div class="tabla-scroll"><table class="tabla">
     <thead>
-        <tr><th>Fecha</th><th>Elemento</th><th>Posición en la cola</th><th></th></tr>
+        <tr><th>Fecha</th><th>Elemento</th><th>PosiciÃ³n en la cola</th><th></th></tr>
     </thead>
     <tbody>
         {% for r in reservas %}
@@ -24,14 +24,14 @@
             <td><span class="badge badge-en-proceso">En espera</span></td>
             <td>
                 <form action="{{ url_for('cancelar_reserva', reserva_id=r.id) }}" method="post"
-                      data-confirmar="¿Cancelar la reserva de {{ r.item_titulo }}?">
+                      data-confirmar="Â¿Cancelar la reserva de {{ r.item_titulo }}?">
                     <button class="btn btn-outline" type="submit">Cancelar</button>
                 </form>
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="4" class="vacio">No tenés reservas. Reservá algo que esté prestado y te avisamos cuando se libere.</td></tr>
+        <tr><td colspan="4" class="vacio">No tenÃ©s reservas. ReservÃ¡ algo que estÃ© prestado y te avisamos cuando se libere.</td></tr>
         {% endfor %}
     </tbody>
-</table>
+</table></div>
 {% endblock %}

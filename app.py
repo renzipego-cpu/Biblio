@@ -3,6 +3,7 @@ import os
 import secrets
 from datetime import date, timedelta
 from functools import wraps
+import unicodedata
 
 from flask import (Flask, Response, abort, flash, redirect, render_template,
                    request, session, url_for)
@@ -85,6 +86,14 @@ def cabeceras_seguridad(respuesta):
 
 
 # ---------------- Helpers ----------------
+def normalizar_texto(texto):
+    """Pasa a minúsculas y quita tildes, para que buscando
+    'matematica' o 'FISICA' se encuentren 'Matemática' o 'Física'."""
+    texto = texto.lower()
+    return ''.join(c for c in unicodedata.normalize('NFD', texto)
+                   if unicodedata.category(c) != 'Mn')
+
+
 def notificar(datos, usuario_id, mensaje):
     """Crea una notificación para un usuario."""
     u = next((u for u in datos["usuarios"] if u["id"] == usuario_id), None)
@@ -195,8 +204,10 @@ def catalogo():
     if genero:
         items = [i for i in items if i.get("genero") == genero]
     if q:
+        q_norm = normalizar_texto(q)
         items = [i for i in items
-                 if q in i["titulo"].lower() or q in i["autor"].lower()]
+                 if q_norm in normalizar_texto(i["titulo"])
+                 or q_norm in normalizar_texto(i["autor"])]
     if orden == "disponibilidad":
         items = sorted(items, key=lambda i: not i["disponible"])
     elif orden == "anio":
