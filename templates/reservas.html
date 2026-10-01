@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Mis reservas · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">Mis reservas</li>
+    </ol>
+</nav>
+<h1>Mis reservas</h1>
+<div class="seccion"></div>
+
+<table class="tabla">
+    <thead>
+        <tr><th>Fecha</th><th>Elemento</th><th>Posición en la cola</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for r in reservas %}
+        <tr>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.item_titulo }}</td>
+            <td><span class="badge badge-en-proceso">En espera</span></td>
+            <td>
+                <form action="{{ url_for('cancelar_reserva', reserva_id=r.id) }}" method="post"
+                      data-confirmar="¿Cancelar la reserva de {{ r.item_titulo }}?">
+                    <button class="btn btn-outline" type="submit">Cancelar</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="vacio">No tenés reservas. Reservá algo que esté prestado y te avisamos cuando se libere.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

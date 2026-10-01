@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}¡Bienvenido! · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<div class="error-404">
+    <i data-lucide="party-popper"></i>
+    <h1>¡Cuenta creada!</h1>
+    <p>{{ usuario.nombre }}, ya estás registrado. Ahora podés pedir libros y materiales desde el catálogo.</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+        <a class="btn btn-dark" href="{{ url_for('catalogo') }}">Ver el catálogo</a>
+        <a class="btn btn-outline" href="{{ url_for('index') }}">Ir al inicio</a>
+    </div>
+</div>
+{% endblock %}

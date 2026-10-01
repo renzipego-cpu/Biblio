@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<div class="auth-box">
+    <h1>Crear cuenta</h1>
+    <p class="subtitulo">Usá tu correo institucional si podés.</p>
+    <form method="post">
+        <label>Nombre y apellido
+            <input type="text" name="nombre" required autocomplete="name">
+        </label>
+        <label>DNI
+            <input type="text" name="dni" required inputmode="numeric">
+        </label>
+        <label>Correo electrónico
+            <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Contraseña
+            <div class="campo-password">
+                <input type="password" name="password" required minlength="4" autocomplete="new-password">
+                <button type="button" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+            </div>
+        </label>
+        <button class="btn btn-dark btn-full" type="submit">Registrarme</button>
+    </form>
+    <p>¿Ya tenés cuenta? <a href="{{ url_for('login') }}">Iniciá sesión</a></p>
+</div>
+{% endblock %}

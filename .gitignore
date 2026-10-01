@@ -1,0 +1,13 @@
+# Entorno virtual
+venv/
+
+# Cache de Python
+__pycache__/
+*.pyc
+
+# Datos de prueba locales (descomentar si NO querés subir tu data.json)
+# data.json
+
+# Editores
+.vscode/
+.idea/

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Mi cuenta · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<h1>Mi cuenta</h1>
+<div class="seccion"></div>
+
+<div class="auth-box auth-box-wide" id="datos">
+    <h2>Mis datos</h2>
+    <p class="subtitulo">Editá tu nombre y DNI. El correo es tu identificador y no se puede cambiar desde acá.</p>
+    <form method="post">
+        <label>Nombre y apellido
+            <input type="text" name="nombre" value="{{ usuario.nombre }}" required>
+        </label>
+        <label>DNI
+            <input type="text" name="dni" value="{{ usuario.dni }}" required>
+        </label>
+        <label>Correo electrónico
+            <input type="email" value="{{ usuario.email }}" disabled>
+        </label>
+        <button class="btn btn-dark btn-full" type="submit">Guardar cambios</button>
+    </form>
+</div>
+
+<div class="auth-box auth-box-wide" id="pago">
+    <h2>Métodos de pago</h2>
+    {% if usuario.socio %}
+        <p class="subtitulo">Elegí cómo abonar la membresía si alguna vez tiene costo.</p>
+        <form method="post">
+            <label>Método de pago de la membresía
+                <select name="metodo_pago">
+                    {% for m in ['Sin definir', 'Efectivo', 'Tarjeta de débito', 'Tarjeta de crédito', 'Transferencia'] %}
+                    <option value="{{ m }}" {{ 'selected' if usuario.metodo_pago == m }}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="btn btn-dark btn-full" type="submit">Guardar</button>
+        </form>
+    {% else %}
+        <p class="vacio">Todavía no sos socio. Los métodos de pago se habilitan con la membresía.</p>
+        <form action="{{ url_for('hacerse_socio') }}" method="post">
+            <button class="btn btn-dark btn-full" type="submit"><i data-lucide="credit-card"></i> Hacerme socio</button>
+        </form>
+    {% endif %}
+</div>
+
+<div class="auth-box auth-box-wide" id="configuracion">
+    <h2>Configuración</h2>
+    <p class="subtitulo">Dejá el campo vacío si no querés cambiar la contraseña.</p>
+    <form method="post">
+        <label>Nueva contraseña
+            <div class="campo-password">
+                <input type="password" name="password" placeholder="Nueva contraseña" minlength="4" autocomplete="new-password">
+                <button type="button" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+            </div>
+        </label>
+        <button class="btn btn-dark btn-full" type="submit">Actualizar contraseña</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Error del servidor · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<div class="error-404">
+    <i data-lucide="triangle-alert"></i>
+    <h1>Algo se rompió de nuestro lado</h1>
+    <p>No pudimos completar la acción. Volvé a intentar en un momento; si sigue fallando, avisale a la bibliotecaria.</p>
+    <a class="btn btn-dark" href="{{ url_for('index') }}"><i data-lucide="home"></i> Volver al inicio</a>
+</div>
+{% endblock %}

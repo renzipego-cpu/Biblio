@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio · Biblioteca Escolar{% endblock %}
+{% block titulo_og %}Biblioteca Escolar — Inicio{% endblock %}
+
+{% set icono_tipo = {
+    'libro': 'book-open', 'proyector': 'projector', 'material': 'notebook-pen',
+    'audiovisual': 'clapperboard', 'equipo': 'monitor', 'otro': 'package'
+} %}
+
+{% macro tarjeta(item) %}
+<div class="card">
+    <div class="card-portada" style="background: {{ item.color }}" role="img" aria-label="Portada de {{ item.titulo }}">
+        <i data-lucide="{{ icono_tipo.get(item.tipo, 'package') }}"></i>
+    </div>
+    <div class="card-body">
+        <a class="card-titulo" href="{{ url_for('detalle', item_id=item.id) }}">{{ item.titulo }}</a>
+        <p class="card-autor">{{ item.autor }}</p>
+        {% if item.disponible %}
+            <span class="estado disponible"><i data-lucide="check-circle-2"></i> Disponible</span>
+        {% else %}
+            <span class="estado no-disponible"><i data-lucide="x-circle"></i> No disponible</span>
+        {% endif %}
+        {% if usuario %}
+            {% if item.disponible %}
+            <form class="js-solicitar" action="{{ url_for('solicitar', item_id=item.id) }}" method="post"
+                  data-titulo="{{ item.titulo }}" data-max="{{ item.stock|default(1) }}">
+                <button class="btn btn-dark btn-full" type="submit"><i data-lucide="shopping-basket"></i> Solicitar</button>
+            </form>
+            {% elif item.id in reservas_usuario %}
+            <span class="badge badge-en-proceso">Reservado</span>
+            {% else %}
+            <form action="{{ url_for('reservar', item_id=item.id) }}" method="post">
+                <button class="btn btn-outline btn-full" type="submit"><i data-lucide="bookmark"></i> Reservar</button>
+            </form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro seccion(titulo, icono, items, tipo) %}
+<section class="seccion">
+    <div class="seccion-header">
+        <h2><i data-lucide="{{ icono }}"></i> {{ titulo }}</h2>
+        <a href="{{ url_for('catalogo', tipo=tipo) }}">Ver todos</a>
+    </div>
+    <div class="grid">
+        {% for item in items %}{{ tarjeta(item) }}{% endfor %}
+    </div>
+</section>
+{% endmacro %}
+
+{% block contenido %}
+<div class="bienvenido">
+    <h1>{{ 'Hola de nuevo, ' + usuario.nombre.split(' ')[0] if usuario else 'Bienvenido' }}</h1>
+    <p>Explorá, aprendé, conseguí lo que necesitás.</p>
+</div>
+
+{% if not usuario %}
+<section class="seccion">
+    <div class="seccion-header">
+        <h2><i data-lucide="route"></i> ¿Cómo funciona?</h2>
+    </div>
+    <ol class="pasos">
+        <li class="paso">
+            <i data-lucide="user-plus"></i>
+            <strong>1. Creá tu cuenta</strong>
+            <p>Registrate con tu correo y DNI, o entrá con la cuenta que te dio la escuela.</p>
+        </li>
+        <li class="paso">
+            <i data-lucide="search"></i>
+            <strong>2. Elegí lo que necesitás</strong>
+            <p>Buscá libros, proyectores y materiales en el catálogo y tocá "Solicitar".</p>
+        </li>
+        <li class="paso">
+            <i data-lucide="package-check"></i>
+            <strong>3. Retiralo en la biblioteca</strong>
+            <p>Te avisamos cuando esté listo. Lo pasás a buscar dentro del horario de atención.</p>
+        </li>
+    </ol>
+    <div class="horarios">
+        <p><i data-lucide="clock"></i> <strong>Atención:</strong> lunes a viernes, 8:00 a 17:00.</p>
+        <a class="btn btn-dark" href="{{ url_for('registro') }}">Crear mi cuenta</a>
+    </div>
+</section>
+{% endif %}
+
+{{ seccion('Libros destacados', 'book-open', libros, 'libro') }}
+{{ seccion('Proyectores', 'projector', proyectores, 'proyector') }}
+{{ seccion('Materiales', 'notebook-pen', materiales, 'material') }}
+{{ seccion('Audiovisuales', 'clapperboard', audiovisuales, 'audiovisual') }}
+{{ seccion('Equipos', 'monitor', equipos, 'equipo') }}
+{{ seccion('Otros', 'ellipsis', otros, 'otro') }}
+{% endblock %}

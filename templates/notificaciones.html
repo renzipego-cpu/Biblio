@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Notificaciones · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">Notificaciones</li>
+    </ol>
+</nav>
+<h1>Notificaciones</h1>
+<div class="seccion"></div>
+
+<div class="contenido-pagina">
+    {% for n in notificaciones %}
+    <div class="noti-item {{ '' if n.leida }}">
+        <i data-lucide="bell"></i>
+        <div>
+            <p>{{ n.mensaje }}</p>
+            <small>{{ n.fecha }}</small>
+        </div>
+    </div>
+    {% else %}
+    <p class="vacio">No tenés notificaciones por ahora.</p>
+    {% endfor %}
+</div>
+{% endblock %}

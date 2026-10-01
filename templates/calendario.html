@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Calendario de equipos · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">Calendario de equipos</li>
+    </ol>
+</nav>
+<h1>Calendario de ocupación</h1>
+<p class="vacio" style="padding:0 0 16px">Mirá qué días está reservado cada proyector, equipo o equipo audiovisual.</p>
+
+<form class="filtros-avanzados" method="get" action="{{ url_for('calendario') }}">
+    <select name="item" aria-label="Elegir elemento" onchange="this.form.submit()">
+        {% for i in ocupables %}
+        <option value="{{ i.id }}" {{ 'selected' if item and i.id == item.id }}>{{ i.titulo }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if item %}
+<section class="seccion">
+    <div class="seccion-header">
+        <h2><i data-lucide="{{ 'projector' if item.tipo == 'proyector' else ('monitor' if item.tipo == 'equipo' else 'clapperboard') }}"></i> {{ item.titulo }} — {{ nombre_mes }} {{ anio }}</h2>
+        <span class="cal-nav">
+            <a class="icono-btn" href="{{ url_for('calendario', item=item.id, mes=mes - 1, anio=anio) }}" aria-label="Mes anterior"><i data-lucide="chevron-left"></i></a>
+            <a class="icono-btn" href="{{ url_for('calendario', item=item.id, mes=mes + 1, anio=anio) }}" aria-label="Mes siguiente"><i data-lucide="chevron-right"></i></a>
+        </span>
+    </div>
+
+    <table class="tabla calendario-tabla" aria-label="Calendario de {{ nombre_mes }}">
+        <thead>
+            <tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th>S</th><th>D</th></tr>
+        </thead>
+        <tbody>
+            {% for semana in semanas %}
+            <tr>
+                {% for dia in semana %}
+                <td class="{{ 'dia-vacio' if dia == 0 else ('dia-ocupado' if dia in dias_ocupados) }}">
+                    {% if dia != 0 %}{{ dia }}{% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="cal-leyenda"><span class="muestra dia-ocupado-muestra"></span> Está prestado esos días</p>
+</section>
+{% else %}
+<p class="vacio">Todavía no hay equipos cargados para mostrar en el calendario.</p>
+{% endif %}
+{% endblock %}

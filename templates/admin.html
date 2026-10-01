@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block titulo %}Administración · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<h1>Panel de administración</h1>
+<div class="seccion"></div>
+
+<section class="seccion">
+    <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i data-lucide="package"></i> Pedidos</h2>
+    <table class="tabla">
+        <thead>
+            <tr><th>#</th><th>Fecha</th><th>Elemento</th><th>Cant.</th><th>Nombre</th><th>DNI</th><th>N° inventario</th><th>Devolución</th><th>Estado</th><th>Cambiar estado</th></tr>
+        </thead>
+        <tbody>
+            {% for p in pedidos %}
+            {% set u = usuarios|selectattr('id', 'equalto', p.usuario_id)|first %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.fecha }}</td>
+                <td>{{ p.item_titulo }}</td>
+                <td>{{ p.cantidad|default(1) }}</td>
+                <td>{{ u.nombre if u else '-' }}</td>
+                <td>{{ u.dni if u else '-' }}</td>
+                <td>{{ p.inventario or '—' }}</td>
+                <td>{{ p.fecha_devolucion or '—' }}</td>
+                <td><span class="badge badge-{{ p.estado|lower|replace(' ', '-') }}">{{ p.estado }}</span></td>
+                <td>
+                    <form class="form-inline" action="{{ url_for('admin_estado_pedido', pedido_id=p.id) }}" method="post">
+                        <input type="text" name="inventario" placeholder="N° inventario"
+                               value="{{ p.inventario or '' }}" class="input-inventario"
+                               title="Obligatorio para entregar">
+                        <input type="date" name="fecha_devolucion" class="input-inventario"
+                               title="Fecha de devolución (opcional; por defecto 7 días)">
+                        <select name="estado">
+                            {% for e in ['En proceso', 'Entregado', 'Devuelto', 'Cancelado'] %}
+                            <option value="{{ e }}" {{ 'selected' if p.estado == e }}>{{ e }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-dark" type="submit">Guardar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="10" class="vacio">No hay pedidos.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section class="seccion">
+    <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i data-lucide="library"></i> Inventario</h2>
+    <form class="form-item" action="{{ url_for('admin_nuevo_item') }}" method="post">
+        <input type="text" name="titulo" placeholder="Título" required>
+        <input type="text" name="autor" placeholder="Autor / detalle">
+        <input type="text" name="descripcion" placeholder="Descripción">
+        <input type="text" name="genero" placeholder="Género" style="width:130px">
+        <input type="number" name="anio" placeholder="Año" min="1900" max="2100" style="width:90px">
+        <input type="number" name="stock" placeholder="Stock" value="1" min="1" style="width:90px">
+        <select name="tipo">
+            <option value="libro">Libro</option>
+            <option value="proyector">Proyector</option>
+            <option value="material">Material</option>
+            <option value="audiovisual">Audiovisual</option>
+            <option value="equipo">Equipo</option>
+            <option value="otro">Otro</option>
+        </select>
+        <button class="btn btn-dark" type="submit">Agregar</button>
+    </form>
+    <table class="tabla">
+        <thead>
+            <tr><th>#</th><th>Tipo</th><th>Título</th><th>Autor</th><th>Stock</th><th>Disponible</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for i in items %}
+            <tr>
+                <td>{{ i.id }}</td>
+                <td>{{ i.tipo }}</td>
+                <td>{{ i.titulo }}</td>
+                <td>{{ i.autor }}</td>
+                <td>{{ i.stock|default(1) }}</td>
+                <td>{{ 'Sí' if i.disponible else 'No' }}</td>
+                <td>
+                    <form action="{{ url_for('admin_eliminar_item', item_id=i.id) }}" method="post"
+                          data-confirmar="¿Eliminar {{ i.titulo }} del inventario?">
+                        <button class="btn btn-outline" type="submit">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section class="seccion">
+    <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i data-lucide="users"></i> Usuarios</h2>
+    <table class="tabla">
+        <thead><tr><th>#</th><th>Nombre</th><th>DNI</th><th>Correo</th><th>Socio</th><th>Admin</th></tr></thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u.id }}</td>
+                <td>{{ u.nombre }}</td>
+                <td>{{ u.dni }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ 'Sí' if u.socio else 'No' }}</td>
+                <td>{{ 'Sí' if u.admin else 'No' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block titulo %}Catálogo · Biblioteca Escolar{% endblock %}
+{% block descripcion %}Catálogo completo de la biblioteca escolar: buscá y filtrá libros, proyectores, materiales, equipos y más.{% endblock %}
+{% block titulo_og %}Biblioteca Escolar — Catálogo{% endblock %}
+
+{% set icono_tipo = {
+    'libro': 'book-open', 'proyector': 'projector', 'material': 'notebook-pen',
+    'audiovisual': 'clapperboard', 'equipo': 'monitor', 'otro': 'package'
+} %}
+{% set nombre_tipo = {
+    'todos': 'Todo', 'libro': 'Libros', 'proyector': 'Proyectores',
+    'material': 'Materiales', 'audiovisual': 'Audiovisuales',
+    'equipo': 'Equipos', 'otro': 'Otros'
+} %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li><a href="{{ url_for('catalogo') }}">Catálogo</a></li>
+        {% if tipo != 'todos' %}
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">{{ nombre_tipo.get(tipo, tipo) }}</li>
+        {% endif %}
+    </ol>
+</nav>
+
+<div class="filtros">
+    {% for clave, nombre in nombre_tipo.items() %}
+    <a class="chip {{ 'activo' if tipo == clave }}"
+       href="{{ url_for('catalogo', tipo=None if clave == 'todos' else clave, q=q, genero=genero, orden=orden) }}">
+        {% if clave != 'todos' %}<i data-lucide="{{ icono_tipo.get(clave, 'package') }}"></i>{% endif %}
+        {{ nombre }}
+    </a>
+    {% endfor %}
+</div>
+
+<form class="filtros-avanzados" action="{{ url_for('catalogo') }}" method="get">
+    <input type="text" name="q" value="{{ q }}" placeholder="Título o autor" aria-label="Buscar por título o autor">
+    {% if tipo != 'todos' %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
+    <select name="genero" aria-label="Filtrar por género">
+        <option value="">Todos los géneros</option>
+        {% for g in generos %}
+        <option value="{{ g }}" {{ 'selected' if genero == g }}>{{ g }}</option>
+        {% endfor %}
+    </select>
+    <select name="orden" aria-label="Ordenar por">
+        <option value="titulo" {{ 'selected' if orden == 'titulo' }}>Ordenar por título</option>
+        <option value="anio" {{ 'selected' if orden == 'anio' }}>Más nuevos primero</option>
+        <option value="disponibilidad" {{ 'selected' if orden == 'disponibilidad' }}>Disponibles primero</option>
+    </select>
+    <button class="btn btn-dark" type="submit"><i data-lucide="sliders-horizontal"></i> Filtrar</button>
+</form>
+
+{% if q %}<p>{{ items|length }} resultado(s) para "<strong>{{ q }}</strong>"</p>{% endif %}
+
+<div class="grid grid-catalogo">
+    {% for item in items %}
+    <div class="card">
+        <div class="card-portada" style="background: {{ item.color }}" role="img" aria-label="Portada de {{ item.titulo }}">
+            <i data-lucide="{{ icono_tipo.get(item.tipo, 'package') }}"></i>
+        </div>
+        <div class="card-body">
+            <a class="card-titulo" href="{{ url_for('detalle', item_id=item.id) }}">{{ item.titulo }}</a>
+            <p class="card-autor">{{ item.autor }} · {{ item.anio }}</p>
+            {% if item.disponible %}
+                <span class="estado disponible"><i data-lucide="check-circle-2"></i> Disponible ({{ item.stock|default(1) }} en stock)</span>
+                {% if usuario %}
+                <form class="js-solicitar" action="{{ url_for('solicitar', item_id=item.id) }}" method="post"
+                      data-titulo="{{ item.titulo }}" data-max="{{ item.stock|default(1) }}">
+                    <button class="btn btn-dark btn-full" type="submit"><i data-lucide="shopping-basket"></i> Solicitar</button>
+                </form>
+                {% endif %}
+            {% else %}
+                <span class="estado no-disponible"><i data-lucide="x-circle"></i> No disponible</span>
+                {% if usuario %}
+                    {% if item.id in reservas_usuario %}
+                    <span class="badge badge-en-proceso">Reservado</span>
+                    {% else %}
+                    <form action="{{ url_for('reservar', item_id=item.id) }}" method="post">
+                        <button class="btn btn-outline btn-full" type="submit"><i data-lucide="bookmark"></i> Reservar</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <p class="vacio">No encontramos nada con esa búsqueda. Probá con otro término o categoría.</p>
+    {% endfor %}
+</div>
+{% endblock %}

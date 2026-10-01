@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Acceso denegado · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<div class="error-404">
+    <i data-lucide="shield-x"></i>
+    <h1>No podés hacer eso</h1>
+    <p>{{ descripcion or 'Esta acción no está permitida.' }}</p>
+    <a class="btn btn-dark" href="{{ url_for('index') }}"><i data-lucide="home"></i> Volver al inicio</a>
+</div>
+{% endblock %}

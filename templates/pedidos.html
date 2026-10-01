@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}Mis pedidos · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<h1>Mis pedidos</h1>
+<div class="seccion"></div>
+<table class="tabla">
+    <thead>
+        <tr><th>Fecha</th><th>Elemento</th><th>Tipo</th><th>Cantidad</th><th>N° inventario</th><th>Devolución</th><th>Estado</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for p in pedidos %}
+        <tr class="{{ 'fila-vencida' if p.vencido }}">
+            <td>{{ p.fecha }}</td>
+            <td>{{ p.item_titulo }}</td>
+            <td>{{ p.item_tipo }}</td>
+            <td>{{ p.cantidad|default(1) }}</td>
+            <td>{{ p.inventario or 'A confirmar' }}</td>
+            <td>
+                {% if p.fecha_devolucion %}
+                    {{ p.fecha_devolucion }}
+                    {% if p.vencido %}<span class="badge badge-cancelado">Vencido</span>{% endif %}
+                {% else %}—{% endif %}
+            </td>
+            <td><span class="badge badge-{{ p.estado|lower|replace(' ', '-') }}">{{ p.estado }}</span></td>
+            <td>
+                {% if p.estado == 'En proceso' %}
+                <form action="{{ url_for('cancelar', pedido_id=p.id) }}" method="post"
+                      data-confirmar="¿Cancelar el pedido de {{ p.item_titulo }}?">
+                    <button class="btn btn-outline" type="submit">Cancelar</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="vacio">Todavía no hiciste ningún pedido. Andá al <a href="{{ url_for('catalogo') }}">catálogo</a> para empezar.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

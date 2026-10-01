@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<div class="auth-box">
+    <h1>Iniciar sesión</h1>
+    <p class="subtitulo">Entrá con la cuenta de la biblioteca.</p>
+    <form method="post">
+        <label>Correo electrónico
+            <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Contraseña
+            <div class="campo-password">
+                <input type="password" name="password" required autocomplete="current-password">
+                <button type="button" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+            </div>
+        </label>
+        <button class="btn btn-dark btn-full" type="submit">Ingresar</button>
+    </form>
+    <p>¿No tenés cuenta? <a href="{{ url_for('registro') }}">Registrate acá</a></p>
+</div>
+{% endblock %}

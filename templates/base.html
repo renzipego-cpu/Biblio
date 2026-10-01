@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Biblioteca Escolar{% endblock %}</title>
+    <meta name="description" content="{% block descripcion %}Sistema de préstamos de la biblioteca escolar: libros, proyectores, materiales y equipos disponibles para alumnos y docentes.{% endblock %}">
+    <meta property="og:title" content="{% block titulo_og %}Biblioteca Escolar{% endblock %}">
+    <meta property="og:description" content="Pedí libros, proyectores y materiales escolares desde la web de la biblioteca.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b2f25' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        // Modo oscuro: aplicar antes de pintar para evitar parpadeo
+        if (localStorage.getItem('tema') === 'oscuro' ||
+            (!localStorage.getItem('tema') && matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.dataset.tema = 'oscuro';
+        }
+    </script>
+</head>
+<body data-csrf="{{ csrf_token }}">
+<div class="layout">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="logo" href="{{ url_for('index') }}">
+                <i data-lucide="book-open"></i> Biblioteca
+            </a>
+            <button class="icono-btn sidebar-cerrar" id="sidebar-cerrar" aria-label="Cerrar menú">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <nav aria-label="Navegación principal">
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">
+                <i data-lucide="home"></i> Inicio
+            </a>
+            <a href="{{ url_for('catalogo', tipo='libro') }}" class="{{ 'active' if request.args.get('tipo') == 'libro' }}">
+                <i data-lucide="library"></i> Libros
+            </a>
+            <a href="{{ url_for('catalogo', tipo='proyector') }}" class="{{ 'active' if request.args.get('tipo') == 'proyector' }}">
+                <i data-lucide="projector"></i> Proyectores
+            </a>
+            <a href="{{ url_for('catalogo', tipo='material') }}" class="{{ 'active' if request.args.get('tipo') == 'material' }}">
+                <i data-lucide="notebook-pen"></i> Materiales
+            </a>
+            <a href="{{ url_for('catalogo', tipo='audiovisual') }}" class="{{ 'active' if request.args.get('tipo') == 'audiovisual' }}">
+                <i data-lucide="clapperboard"></i> Audiovisuales
+            </a>
+            <a href="{{ url_for('catalogo', tipo='equipo') }}" class="{{ 'active' if request.args.get('tipo') == 'equipo' }}">
+                <i data-lucide="monitor"></i> Equipos
+            </a>
+            <a href="{{ url_for('catalogo', tipo='otro') }}" class="{{ 'active' if request.args.get('tipo') == 'otro' }}">
+                <i data-lucide="ellipsis"></i> Otros
+            </a>
+            {% if usuario and usuario.admin %}
+                <a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' }}">
+                    <i data-lucide="wrench"></i> Administración
+                </a>
+            {% endif %}
+        </nav>
+        <p class="frase">"El conocimiento también se comparte."</p>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay" hidden></div>
+
+    <div class="main">
+        <header class="topbar">
+            <button class="icono-btn sidebar-abrir" id="sidebar-abrir" aria-label="Abrir menú">
+                <i data-lucide="menu"></i>
+            </button>
+            <form class="buscador" action="{{ url_for('catalogo') }}" method="get" role="search">
+                <i data-lucide="search" class="buscador-icono"></i>
+                <input type="text" name="q" placeholder="Buscar libros, proyectores, materiales..."
+                       value="{{ q or '' }}" aria-label="Buscar en el catálogo">
+            </form>
+            <div class="topbar-acciones">
+                {% if usuario %}
+                <a class="icono-btn campana" href="{{ url_for('notificaciones') }}" aria-label="Notificaciones" title="Notificaciones">
+                    <i data-lucide="bell"></i>
+                    {% if notis_no_leidas %}<span class="campana-badge">{{ notis_no_leidas }}</span>{% endif %}
+                </a>
+                {% endif %}
+                <button class="icono-btn" id="tema-toggle" aria-label="Cambiar tema">
+                    <i data-lucide="moon" class="icono-luna"></i>
+                    <i data-lucide="sun" class="icono-sol"></i>
+                </button>
+                {% if usuario %}
+                    <a class="btn btn-outline" href="{{ url_for('mis_pedidos') }}">
+                        <i data-lucide="package"></i> Mis pedidos
+                    </a>
+                    <a class="btn btn-dark" href="{{ url_for('logout') }}">
+                        <i data-lucide="log-out"></i> Salir
+                    </a>
+                {% else %}
+                    <a class="btn btn-outline" href="{{ url_for('login') }}">
+                        <i data-lucide="user"></i> Iniciar sesión
+                    </a>
+                    <a class="btn btn-dark" href="{{ url_for('registro') }}">Registrarse</a>
+                {% endif %}
+            </div>
+        </header>
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for cat, msg in mensajes %}
+                <div class="flash flash-{{ cat }}" role="alert">
+                    <i data-lucide="{{ 'check-circle-2' if cat == 'ok' else 'alert-circle' }}"></i>
+                    {{ msg }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <main class="contenido">
+            {% block contenido %}{% endblock %}
+        </main>
+
+        <footer class="footer">
+            <nav aria-label="Enlaces de interés">
+                <a href="{{ url_for('faq') }}">Preguntas frecuentes</a>
+                <a href="{{ url_for('privacidad') }}">Privacidad</a>
+            </nav>
+            <p>Última actualización del catálogo: 30/09/2026</p>
+        </footer>
+    </div>
+
+    {% if usuario %}
+    <aside class="panel-usuario" aria-label="Panel de usuario">
+        <div class="panel-card usuario-card">
+            <div class="avatar"><i data-lucide="user"></i></div>
+            <div>
+                <h3>{{ usuario.nombre }}</h3>
+                <p class="usuario-rol">{{ 'Socio' if usuario.socio else 'Alumno' }}</p>
+            </div>
+            <dl>
+                <div><dt>Nombre</dt><dd>{{ usuario.nombre }}</dd></div>
+                <div><dt>DNI</dt><dd>{{ usuario.dni }}</dd></div>
+                <div><dt>Correo</dt><dd class="correo-valor">{{ usuario.email }}</dd></div>
+            </dl>
+            <button class="btn btn-outline btn-copiar" data-copiar="{{ usuario.email }}">
+                <i data-lucide="copy"></i> Copiar correo
+            </button>
+            {% if not usuario.socio %}
+            <div class="socio-box">
+                <strong><i data-lucide="shield"></i> Todavía no sos socio</strong>
+                <p>La membresía te da prioridad en reservas y devoluciones más flexibles.</p>
+                <form action="{{ url_for('hacerse_socio') }}" method="post">
+                    <button class="btn btn-dark btn-full" type="submit">
+                        <i data-lucide="credit-card"></i> Hacerme socio
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="socio-box socio-ok">
+                <strong><i data-lucide="shield-check"></i> Ya sos socio</strong>
+                <p>Tenés acceso a todos los beneficios.</p>
+            </div>
+            {% endif %}
+            <nav class="cuenta-nav" aria-label="Mi cuenta">
+                <a href="{{ url_for('cuenta') }}"><i data-lucide="user-cog"></i> Mis datos</a>
+                <a href="{{ url_for('favoritos') }}"><i data-lucide="star"></i> Favoritos</a>
+                <a href="{{ url_for('mis_reservas') }}"><i data-lucide="bookmark"></i> Mis reservas</a>
+                <a href="{{ url_for('calendario') }}"><i data-lucide="calendar"></i> Calendario de equipos</a>
+                <a href="{{ url_for('mis_pedidos') }}"><i data-lucide="receipt"></i> Historial de pedidos</a>
+                <a href="{{ url_for('cuenta') }}#pago"><i data-lucide="credit-card"></i> Métodos de pago</a>
+                <a href="{{ url_for('cuenta') }}#configuracion"><i data-lucide="settings"></i> Configuración</a>
+                <a href="{{ url_for('logout') }}"><i data-lucide="log-out"></i> Cerrar sesión</a>
+            </nav>
+        </div>
+        <div class="panel-card">
+            <div class="seccion-header">
+                <h3><i data-lucide="package"></i> Mis pedidos</h3>
+                <a href="{{ url_for('mis_pedidos') }}">Ver todos</a>
+            </div>
+            {% for p in pedidos_recientes %}
+            <div class="pedido-mini">
+                <div>
+                    <strong>{{ p.item_titulo }}</strong>
+                    <small>{{ p.fecha }}</small>
+                </div>
+                <span class="badge badge-{{ p.estado|lower|replace(' ', '-') }}">{{ p.estado }}</span>
+            </div>
+            {% else %}
+            <p class="vacio">Todavía no tenés pedidos.</p>
+            {% endfor %}
+        </div>
+    </aside>
+    {% endif %}
+</div>
+
+<button id="volver-arriba" class="icono-btn flotante" aria-label="Volver arriba" hidden>
+    <i data-lucide="arrow-up"></i>
+</button>
+
+<!-- Miniventana de cantidad -->
+<div id="modal-cantidad" class="modal" hidden>
+    <div class="modal-overlay" data-cerrar-modal></div>
+    <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modal-cantidad-titulo">
+        <div class="modal-header">
+            <h2 id="modal-cantidad-titulo">Solicitar</h2>
+            <button type="button" class="icono-btn" data-cerrar-modal aria-label="Cerrar">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <p class="modal-item" id="modal-item-nombre"></p>
+        <p class="modal-stock">Quedan <strong id="modal-stock"></strong> unidades.</p>
+        <label for="modal-cantidad-input">¿Cuántas unidades necesitás?</label>
+        <input type="number" id="modal-cantidad-input" value="1" min="1">
+        <div class="modal-botones">
+            <button type="button" class="btn btn-outline" data-cerrar-modal>Cancelar</button>
+            <button type="button" class="btn btn-dark" id="modal-confirmar">
+                <i data-lucide="shopping-basket"></i> Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

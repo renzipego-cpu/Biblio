@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Página no encontrada · Biblioteca Escolar{% endblock %}
+
+{% block contenido %}
+<div class="error-404">
+    <i data-lucide="book-x"></i>
+    <h1>Esta página no existe</h1>
+    <p>Puede que el enlace esté roto o que la página se haya movido.</p>
+    <a class="btn btn-dark" href="{{ url_for('index') }}"><i data-lucide="home"></i> Volver al inicio</a>
+</div>
+{% endblock %}

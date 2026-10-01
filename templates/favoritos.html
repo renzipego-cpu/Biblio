@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Favoritos · Biblioteca Escolar{% endblock %}
+
+{% set icono_tipo = {
+    'libro': 'book-open', 'proyector': 'projector', 'material': 'notebook-pen',
+    'audiovisual': 'clapperboard', 'equipo': 'monitor', 'otro': 'package'
+} %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">Favoritos</li>
+    </ol>
+</nav>
+<h1>Mis favoritos</h1>
+<div class="seccion"></div>
+
+<div class="grid grid-catalogo">
+    {% for item in items %}
+    <div class="card">
+        <div class="card-portada" style="background: {{ item.color }}" role="img" aria-label="Portada de {{ item.titulo }}">
+            <i data-lucide="{{ icono_tipo.get(item.tipo, 'package') }}"></i>
+        </div>
+        <div class="card-body">
+            <a class="card-titulo" href="{{ url_for('detalle', item_id=item.id) }}">{{ item.titulo }}</a>
+            <p class="card-autor">{{ item.autor }}</p>
+            {% if item.disponible %}
+                <span class="estado disponible"><i data-lucide="check-circle-2"></i> Disponible</span>
+                <form class="js-solicitar" action="{{ url_for('solicitar', item_id=item.id) }}" method="post"
+                      data-titulo="{{ item.titulo }}" data-max="{{ item.stock|default(1) }}">
+                    <button class="btn btn-dark btn-full" type="submit"><i data-lucide="shopping-basket"></i> Solicitar</button>
+                </form>
+            {% else %}
+                <span class="estado no-disponible"><i data-lucide="x-circle"></i> No disponible</span>
+                <form action="{{ url_for('reservar', item_id=item.id) }}" method="post">
+                    <button class="btn btn-outline btn-full" type="submit"><i data-lucide="bookmark"></i> Reservar</button>
+                </form>
+            {% endif %}
+            <p class="fav-nota">¿Ya no querés seguirlo? Sacá la estrella desde su <a href="{{ url_for('detalle', item_id=item.id) }}">ficha</a>.</p>
+        </div>
+    </div>
+    {% else %}
+    <p class="vacio">Todavía no guardaste favoritos. Tocá la estrella en cualquier tarjeta del <a href="{{ url_for('catalogo') }}">catálogo</a>.</p>
+    {% endfor %}
+</div>
+{% endblock %}

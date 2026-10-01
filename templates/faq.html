@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Preguntas frecuentes · Biblioteca Escolar{% endblock %}
+{% block descripcion %}Preguntas frecuentes sobre préstamos, membresías y devoluciones en la biblioteca escolar.{% endblock %}
+
+{% block contenido %}
+<div class="contenido-pagina">
+    <h1>Preguntas frecuentes</h1>
+    <p>Respondemos las dudas más habituales. Si tenés otra, preguntale a la bibliotecaria.</p>
+
+    <details class="faq-item">
+        <summary>¿Cómo pido un libro o un proyector?</summary>
+        <p>Creá tu cuenta, entrá al catálogo y tocá "Solicitar" en lo que necesites. El pedido pasa a "En proceso" y lo retirás en la biblioteca cuando esté listo.</p>
+    </details>
+    <details class="faq-item">
+        <summary>¿Cuáles son los tiempos de respuesta?</summary>
+        <p>Los pedidos de libros suelen estar listos en el día. Los equipos y proyectores se confirman dentro de las 24 horas hábiles.</p>
+    </details>
+    <details class="faq-item">
+        <summary>¿Cuántas cosas puedo tener prestadas a la vez?</summary>
+        <p>Hasta 5 pedidos activos por alumno. Si necesitás más, antes tenés que devolver algo.</p>
+    </details>
+    <details class="faq-item">
+        <summary>¿Qué pasa si devuelvo algo tarde?</summary>
+        <p>Lo hablamos en la biblioteca. No hay multa, pero si atrasás la devolución no vas a poder pedir cosas nuevas hasta regularizar.</p>
+    </details>
+    <details class="faq-item">
+        <summary>¿Qué beneficios da la membresía de socio?</summary>
+        <p>Prioridad cuando un elemento está muy pedido y plazos de devolución más flexibles. Es gratis: la activás desde tu perfil, en "Hacerme socio".</p>
+    </details>
+    <details class="faq-item">
+        <summary>Olvidé mi contraseña, ¿qué hago?</summary>
+        <p>Pedile a la bibliotecaria que la reinicie desde el panel de administración, o contactala por el correo de la escuela.</p>
+    </details>
+</div>
+{% endblock %}

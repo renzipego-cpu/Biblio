@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block titulo %}{{ item.titulo }} · Biblioteca Escolar{% endblock %}
+{% block descripcion %}{{ item.titulo }} ({{ item.anio }}) — disponible para préstamo en la biblioteca escolar.{% endblock %}
+
+{% set icono_tipo = {
+    'libro': 'book-open', 'proyector': 'projector', 'material': 'notebook-pen',
+    'audiovisual': 'clapperboard', 'equipo': 'monitor', 'otro': 'package'
+} %}
+
+{% block contenido %}
+<nav aria-label="Migas de pan">
+    <ol class="migas">
+        <li><a href="{{ url_for('index') }}">Inicio</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li><a href="{{ url_for('catalogo', tipo=item.tipo) }}">Catálogo</a></li>
+        <li><i data-lucide="chevron-right"></i></li>
+        <li aria-current="page">{{ item.titulo }}</li>
+    </ol>
+</nav>
+
+<div class="detalle">
+    <div class="card-portada detalle-portada" style="background: {{ item.color }}" role="img" aria-label="Portada de {{ item.titulo }}">
+        <i data-lucide="{{ icono_tipo.get(item.tipo, 'package') }}"></i>
+    </div>
+    <div class="detalle-info">
+        <p class="pill">{{ item.genero }}</p>
+        <h1>{{ item.titulo }}</h1>
+        <p class="card-autor">{{ item.autor }} · {{ item.anio }}</p>
+        <p>{{ item.sinopsis }}</p>
+        <p>
+            {% if item.disponible %}
+                <span class="estado disponible"><i data-lucide="check-circle-2"></i> Disponible ({{ item.stock|default(1) }} en stock)</span>
+            {% else %}
+                <span class="estado no-disponible"><i data-lucide="x-circle"></i> No disponible</span>
+                {% if ocupacion and ocupacion[0].fecha_devolucion %}
+                <span class="detalle-vuelta">Vuelve el {{ ocupacion[0].fecha_devolucion }}</span>
+                {% endif %}
+            {% endif %}
+        </p>
+        {% if usuario %}
+        <div class="detalle-acciones">
+            {% if item.disponible %}
+            <form class="js-solicitar" action="{{ url_for('solicitar', item_id=item.id) }}" method="post"
+                  data-titulo="{{ item.titulo }}" data-max="{{ item.stock|default(1) }}">
+                <button class="btn btn-dark" type="submit"><i data-lucide="shopping-basket"></i> Solicitar préstamo</button>
+            </form>
+            {% elif reservado %}
+            <span class="badge badge-en-proceso">Ya la reservaste — te avisamos cuando se libere</span>
+            {% else %}
+            <form action="{{ url_for('reservar', item_id=item.id) }}" method="post">
+                <button class="btn btn-outline" type="submit"><i data-lucide="bookmark"></i> Reservar (me avisan cuando se libere)</button>
+            </form>
+            {% endif %}
+            <form action="{{ url_for('favorito_toggle', item_id=item.id) }}" method="post">
+                <button class="btn btn-outline" type="submit">
+                    <i data-lucide="star" class="{{ 'fav-activo' if es_favorito }}"></i>
+                    {{ 'En favoritos' if es_favorito else 'Agregar a favoritos' }}
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <p class="vacio">Para pedirlo, <a href="{{ url_for('login') }}">iniciá sesión</a>.</p>
+        {% endif %}
+        <a href="{{ url_for('catalogo', tipo=item.tipo) }}" class="volver">
+            <i data-lucide="arrow-left"></i> Volver al catálogo
+        </a>
+    </div>
+</div>
+{% endblock %}

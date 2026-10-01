@@ -1,0 +1,47 @@
+IDEAS DE MEJORA — Biblioteca Escolar
+Última actualización: 30/09/2026
+
+Leyenda: [HECHA] = ya está implementada · [PENDIENTE] = por hacer
+
+== Impacto visual ==================================================
+
+1. [PENDIENTE] Portadas reales de libros con la API de Open Library
+   (gratis, sin clave). Queda a evaluar si la escuela la permite.
+2. [HECHA]    Página de detalle más rica: género, año, sinopsis,
+              favorito, reserva y fecha en que vuelve si está prestado.
+3. [HECHA]    Notificaciones en la campanita del header: avisan cuando
+              el pedido pasa a "Entregado", cuando se registra la
+              devolución, y cuando se libera algo que reservaste.
+4. [HECHA]    Calendario de ocupación de proyectores/equipos:
+              elegís el elemento y se ve el mes con los días marcados.
+
+== Funcionalidad ====================================================
+
+5. [HECHA]    Fecha de devolución: el admin la carga al entregar
+              (si no, se ponen 7 días por defecto) y el usuario la ve
+              en "Mis pedidos" con etiqueta roja "Vencido" si pasó.
+6. [HECHA]    Reservas / cola de espera: si algo está prestado, lo
+              reservás y te llega una notificación cuando se libera.
+              Página propia "Mis reservas" con cancelación.
+7. [HECHA]    Favoritos: estrella en las tarjetas y en el detalle,
+              más página "Mis favoritos".
+8. [PENDIENTE] Valoraciones con estrellas (1-5) al devolver.
+               A definir con la escuela (moderación, permisos).
+9. [HECHA]    Búsqueda avanzada en el catálogo: filtro por género y
+              orden por título, año o disponibilidad.
+
+== Para el admin (bibliotecaria) =====================================
+
+10. [PENDIENTE] Panel con estadísticas: lo más pedido del mes, usuarios
+                más activos, vencidos. Evaluar permisos de la escuela.
+11. [PENDIENTE] Búsqueda de alumno por DNI al entregar, sin entrar al
+                panel completo.
+12. [PENDIENTE] Exportar pedidos a CSV/Excel para reportes del colegio.
+13. [PENDIENTE] Carnet de socio imprimible / con QR.
+
+== Toque profesional ================================================
+
+14. [HECHA]    Inicio para visitantes: hero, "¿Cómo funciona?" en 3
+               pasos, horarios de atención y botón de registro claro.
+15. [HECHA]    Sección "¿Cómo funciona" desde la landing.
+16. [HECHA]    README.md con guía de instalación y uso.
