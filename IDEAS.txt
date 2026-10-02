@@ -80,3 +80,48 @@ Leyenda: [HECHA] = ya está implementada · [PENDIENTE] = por hacer
                 Vencidos) y búsqueda por DNI o nombre.
 26. [HECHA]    PWA básica: manifest + service worker + ícono, se puede
                 "instalar" desde el celu como una app.
+
+== Tanda 3 (01/10/2026) ==============================================
+
+-- Para los alumnos --
+
+27. [PENDIENTE] Sugerencia del día en el inicio: un elemento destacado
+                que rota según la fecha (determinístico, sin azar).
+28. [PENDIENTE] "Agregar a mi calendario": botón en Mis pedidos que
+                descarga un archivo .ics con la fecha de devolución
+                (Google Calendar / celu lo abren solo).
+29. [PENDIENTE] Consultas a la bibliotecaria: botón "Hacer una consulta"
+                que le llega como notificación a la admin.
+30. [PENDIENTE] Insignias de lector (gamificación): bronce / plata / oro
+                según libros devueltos a tiempo. Divertido para primaria.
+31. [PENDIENTE] Autocompletado en vivo en el buscador (mientras
+                escribís, sugiere títulos).
+
+-- Para la bibliotecaria --
+
+32. [PENDIENTE] Etiquetas de estantería imprimibles: generar una página
+                para imprimir con título, código y QR de cada elemento.
+33. [PENDIENTE] QR de cada elemento: escaneás el QR de la ficha física
+                y te abre la página del elemento con su disponibilidad.
+34. [PENDIENTE] Préstamos con fecha futura: el docente reserva el
+                proyector para el jueves próximo (hoy solo se pide ya).
+35. [PENDIENTE] Reset de contraseña por parte de la admin: genera una
+                clave temporal para el alumno que la olvidó.
+36. [PENDIENTE] Log de auditoría: registrar quién cambió qué estado y
+                cuándo (tabla simple, suma seriedad al proyecto).
+37. [PENDIENTE] Exportar inventario y pedidos a CSV (idea vieja 12).
+
+-- Seriedad técnica (para la entrega) --
+
+38. [PENDIENTE] Tests automáticos con pytest: convertir los tests
+                manuales en suite ("40 tests verdes" en el README).
+39. [PENDIENTE] Rate limit al login: bloquear 5 minutos tras 5 intentos
+                fallidos (fuerza bruta).
+40. [PENDIENTE] Pedir contraseña actual para cambiarla en Configuración.
+41. [PENDIENTE] Backups automáticos de data.json: botón "descargar copia"
+                + tarea diaria en PythonAnywhere.
+42. [PENDIENTE] Página "Novedades": lo último agregado al catálogo.
+43. [PENDIENTE] Accesibilidad: modo texto grande y navegación completa
+                por teclado (Tab / Enter).
+44. [PENDIENTE] Subida segura de foto de portada (upload con validación
+                de tipo y tamaño; alternativa a la idea 1 de Open Library).
