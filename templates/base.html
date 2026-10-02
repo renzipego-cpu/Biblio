@@ -89,16 +89,18 @@
                 </button>
                 {% if usuario %}
                     <a class="btn btn-outline" href="{{ url_for('mis_pedidos') }}">
-                        <i data-lucide="package"></i> Mis pedidos
+                        <i data-lucide="package"></i> <span>Mis pedidos</span>
                     </a>
                     <a class="btn btn-dark" href="{{ url_for('logout') }}">
-                        <i data-lucide="log-out"></i> Salir
+                        <i data-lucide="log-out"></i> <span>Salir</span>
                     </a>
                 {% else %}
                     <a class="btn btn-outline" href="{{ url_for('login') }}">
-                        <i data-lucide="user"></i> Iniciar sesión
+                        <i data-lucide="user"></i> <span>Iniciar sesión</span>
                     </a>
-                    <a class="btn btn-dark" href="{{ url_for('registro') }}">Registrarse</a>
+                    <a class="btn btn-dark" href="{{ url_for('registro') }}">
+                        <i data-lucide="user-plus"></i> <span>Registrarse</span>
+                    </a>
                 {% endif %}
             </div>
         </header>

@@ -911,7 +911,16 @@ details.faq-item p { margin-top: 10px; color: var(--texto-suave); }
     }
     .sidebar-abrir { display: inline-flex; }
     .detalle { flex-direction: column; }
+    /* Barra superior compacta: botones solo con ícono para que el
+       buscador no quede aplastado ni nada se solape */
+    .main { padding: 12px 14px; }
+    .topbar { gap: 8px; padding: 10px 0; flex-wrap: nowrap; }
+    .topbar-acciones { gap: 6px; }
+    .icono-btn { width: 38px; height: 38px; }
+    .topbar .btn { padding: 8px 10px; }
     .topbar .btn span { display: none; }
+    .buscador input { padding: 10px 14px 10px 38px; font-size: 0.9rem; }
+    .buscador-icono { left: 12px; }
 }
 
 /* Laptops de pantalla corta (Conectar Igualdad y similares):
