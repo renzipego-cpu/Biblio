@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+import shutil
 from datetime import date, timedelta
 from functools import wraps
 import unicodedata
@@ -11,6 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data.json")
+DATA_SEED = os.path.join(BASE_DIR, "data-seed.json")
 
 app = Flask(__name__)
 # La clave secreta se toma de una variable de entorno; nunca se sube a git.
@@ -26,6 +28,12 @@ DIAS_PRESTAMO = 7
 
 
 # ---------------- Persistencia (JSON) ----------------
+# Si es la primera vez que corre (por ejemplo, después de un git clone),
+# arranca con los datos de ejemplo de data-seed.json.
+if not os.path.exists(DATA_FILE) and os.path.exists(DATA_SEED):
+    shutil.copyfile(DATA_SEED, DATA_FILE)
+
+
 def cargar_datos():
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
