@@ -21,7 +21,13 @@
         <tr>
             <td>{{ r.fecha }}</td>
             <td>{{ r.item_titulo }}</td>
-            <td><span class="badge badge-en-proceso">En espera</span></td>
+            <td>
+                {% if r.total > 1 %}
+                <span class="badge badge-en-proceso">#{{ r.posicion }} de {{ r.total }} en la cola</span>
+                {% else %}
+                <span class="badge badge-entregado">Primera en la cola</span>
+                {% endif %}
+            </td>
             <td>
                 <form action="{{ url_for('cancelar_reserva', reserva_id=r.id) }}" method="post"
                       data-confirmar="¿Cancelar la reserva de {{ r.item_titulo }}?">

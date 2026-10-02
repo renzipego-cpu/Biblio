@@ -47,7 +47,7 @@
         </thead>
         <tbody>
             {% for p in pedidos %}
-            {% set u = usuarios|selectattr('id', 'equalto', p.usuario_id)|first %}
+            {% set u = usuarios_map.get(p.usuario_id) %}
             <tr>
                 <td>{{ p.id }}</td>
                 <td>{{ p.fecha }}</td>
@@ -139,7 +139,7 @@
     <div class="tabla-scroll"><table class="tabla">
         <thead><tr><th>#</th><th>Nombre</th><th>DNI</th><th>Correo</th><th>Socio</th><th>Admin</th></tr></thead>
         <tbody>
-            {% for u in usuarios %}
+            {% for u in usuarios_map.values() %}
             <tr>
                 <td>{{ u.id }}</td>
                 <td>{{ u.nombre }}</td>

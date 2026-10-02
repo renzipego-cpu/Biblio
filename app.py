@@ -2,12 +2,14 @@ import json
 import os
 import secrets
 import shutil
+import calendar as cal
+import unicodedata
+from collections import Counter
 from datetime import date, timedelta
 from functools import wraps
-import unicodedata
 
-from flask import (Flask, Response, abort, flash, redirect, render_template,
-                   request, session, url_for)
+from flask import (Flask, Response, abort, flash, g, redirect,
+                   render_template, request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -17,6 +19,10 @@ DATA_SEED = os.path.join(BASE_DIR, "data-seed.json")
 app = Flask(__name__)
 # La clave secreta se toma de una variable de entorno; nunca se sube a git.
 app.secret_key = os.environ.get("BIBLIOTECA_SECRET_KEY", secrets.token_hex(32))
+
+# Los estáticos (CSS/JS/íconos) se cachean 5 minutos en el navegador:
+# menos pedidos al servidor en cada página vista.
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 300
 
 HASH_PREFIXES = ("pbkdf2", "scrypt")
 
@@ -35,17 +41,27 @@ if not os.path.exists(DATA_FILE) and os.path.exists(DATA_SEED):
 
 
 def cargar_datos():
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    """Lee data.json UNA sola vez por request (cache en flask.g).
+    Antes se abría y parseaba el archivo 3-4 veces por página."""
+    if not hasattr(g, "_datos"):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            g._datos = json.load(f)
+    return g._datos
 
 
-def guardar_datos(datos):
+def guardar_datos(datos=None):
     """Escritura atómica: primero a un archivo temporal y después se
-    reemplaza, para no corruptar data.json si el proceso se corta."""
+    reemplaza, para no corruptar data.json si el proceso se corta.
+    También mantiene la cache del request sincronizada."""
+    if datos is None:
+        datos = getattr(g, "_datos", None)
+    if datos is None:
+        raise ValueError("No hay datos para guardar.")
     temporal = DATA_FILE + ".tmp"
     with open(temporal, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=2)
     os.replace(temporal, DATA_FILE)
+    g._datos = datos
 
 
 def nuevo_id(datos, clave, coleccion):
@@ -67,7 +83,11 @@ def verificar_password(guardada, ingresada):
 
 @app.before_request
 def verificar_csrf():
-    """CSRF: todo POST debe traer el token de sesión."""
+    """CSRF: todo POST debe traer el token de sesión.
+    Los archivos estáticos se saltan: no usan sesión y así no
+    generan cookies al pedirse."""
+    if request.endpoint == "static":
+        return
     if "csrf_token" not in session:
         session["csrf_token"] = secrets.token_hex(16)
     if request.method == "POST":
@@ -85,7 +105,7 @@ def cabeceras_seguridad(respuesta):
     respuesta.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     respuesta.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://unpkg.com; "
+        "script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src https://fonts.gstatic.com; "
         "img-src 'self' data:"
@@ -152,13 +172,15 @@ def pedidos_vencidos(datos):
 
 
 def usuario_actual():
+    """Usuario con sesión iniciada (cacheado por request)."""
     if "usuario_id" not in session:
         return None
+    if hasattr(g, "_usuario"):
+        return g._usuario
     datos = cargar_datos()
-    for u in datos["usuarios"]:
-        if u["id"] == session["usuario_id"]:
-            return u
-    return None
+    g._usuario = next((u for u in datos["usuarios"]
+                       if u["id"] == session["usuario_id"]), None)
+    return g._usuario
 
 
 def login_requerido(f):
@@ -228,6 +250,8 @@ def catalogo():
     items = datos["items"]
     if tipo != "todos":
         items = [i for i in items if i["tipo"] == tipo]
+    # Géneros según la categoría que estás viendo (no todos los del sistema)
+    generos = sorted({i.get("genero") for i in items if i.get("genero")})
     if genero:
         genero_norm = normalizar_texto(genero)
         items = [i for i in items
@@ -250,7 +274,6 @@ def catalogo():
     else:
         items = sorted(items, key=lambda i: i["titulo"].lower())
 
-    generos = sorted({i.get("genero") for i in datos["items"] if i.get("genero")})
     u = usuario_actual()
     favoritos = u.get("favoritos", []) if u else []
     reservas_usuario = [r["item_id"] for r in datos.get("reservas", [])
@@ -272,8 +295,8 @@ def detalle(item_id):
         "detalle.html",
         item=item,
         es_favorito=bool(u and item_id in u.get("favoritos", [])),
-        reservado=any(r for r in datos.get("reservas", [])
-                      if r["item_id"] == item_id and r["usuario_id"] == uid),
+        reservado=any(r["item_id"] == item_id and r["usuario_id"] == uid
+                      for r in datos.get("reservas", [])),
         ocupacion=[p for p in datos["pedidos"]
                    if p["item_id"] == item_id and p["estado"] == "Entregado"],
         recomendaciones=[i for i in datos["items"]
@@ -304,18 +327,19 @@ def solicitar(item_id):
         flash(f'Solo quedan {item.get("stock", 0)} unidades de "{item["titulo"]}".', "error")
         return redirect(request.referrer or url_for("index"))
 
-    ya_pedido = any(p for p in datos["pedidos"]
-                    if p["item_id"] == item_id
-                    and p["usuario_id"] == session["usuario_id"]
-                    and p["estado"] in ("En proceso", "Entregado"))
+    ya_pedido = False
+    activas = 0
+    for p in datos["pedidos"]:
+        if p["usuario_id"] != session["usuario_id"]:
+            continue
+        if p["estado"] in ("En proceso", "Entregado"):
+            activas += p.get("cantidad", 1)
+            if p["item_id"] == item_id:
+                ya_pedido = True
     if ya_pedido:
         flash("Ya tenés un pedido activo de este elemento.", "error")
         return redirect(request.referrer or url_for("index"))
 
-    # Límite de unidades activas por usuario (sumando cantidades)
-    activas = sum(p.get("cantidad", 1) for p in datos["pedidos"]
-                  if p["usuario_id"] == session["usuario_id"]
-                  and p["estado"] in ("En proceso", "Entregado"))
     if activas + cantidad > MAX_PEDIDOS_ACTIVOS:
         flash(f"Alcanzaste el máximo de {MAX_PEDIDOS_ACTIVOS} unidades pedidas a la vez. "
               "Devolvé algo antes de pedir más.", "error")
@@ -372,8 +396,17 @@ def reservar(item_id):
 @login_requerido
 def mis_reservas():
     datos = cargar_datos()
-    reservas = [r for r in datos.get("reservas", [])
-                if r["usuario_id"] == session["usuario_id"]]
+    todas = datos.get("reservas", [])
+    por_item = Counter(r["item_id"] for r in todas)
+    orden_item = {}
+    reservas = []
+    for r in todas:
+        orden_item[r["item_id"]] = orden_item.get(r["item_id"], 0) + 1
+        if r["usuario_id"] == session["usuario_id"]:
+            rp = dict(r)
+            rp["posicion"] = orden_item[r["item_id"]]
+            rp["total"] = por_item[r["item_id"]]
+            reservas.append(rp)
     return render_template("reservas.html", reservas=reservas)
 
 
@@ -436,7 +469,6 @@ def notificaciones():
 @app.route("/calendario")
 @login_requerido
 def calendario():
-    import calendar as cal
     datos = cargar_datos()
     item_id = request.args.get("item", type=int)
     hoy = date.today()
@@ -649,6 +681,7 @@ def cuenta():
 def admin():
     datos = cargar_datos()
     q = request.args.get("q", "").strip().lower()
+    # Mapa id -> usuario: evita buscar en la lista por cada fila de la tabla
     usuarios_map = {u["id"]: u for u in datos["usuarios"]}
 
     pedidos = datos["pedidos"]
@@ -662,14 +695,13 @@ def admin():
 
     return render_template("admin.html", items=datos["items"],
                            pedidos=pedidos,
-                           usuarios=datos["usuarios"],
+                           usuarios_map=usuarios_map,
                            vencidos=pedidos_vencidos(datos), q=q)
 
 
 @app.route("/admin/estadisticas")
 @admin_requerido
 def admin_estadisticas():
-    from collections import Counter
     datos = cargar_datos()
     pedidos = datos["pedidos"]
 
@@ -738,11 +770,12 @@ def mostrador():
             if pedidos:
                 resultados.append({"usuario": u, "pedidos": pedidos})
 
+    vencidos = pedidos_vencidos(datos)
     return render_template(
         "mostrador.html",
         accion=accion, buscar=buscar, resultados=resultados,
-        vencidos=pedidos_vencidos(datos) if accion == "vencidos" else [],
-        vencidos_total=len(pedidos_vencidos(datos)),
+        vencidos=vencidos if accion == "vencidos" else [],
+        vencidos_total=len(vencidos),
         hoy=date.today().strftime("%d/%m/%Y"),
         fecha_default=(date.today() + timedelta(days=DIAS_PRESTAMO)).strftime("%Y-%m-%d"),
     )
