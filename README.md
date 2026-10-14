@@ -4,6 +4,8 @@ Sitio web de préstamos para la biblioteca de la escuela. Permite buscar y solic
 
 Proyecto escolar hecho con **Flask + HTML/CSS/JS**, sin base de datos: todo se guarda en `data.json`.
 
+> **Para el personal de biblioteca:** hay una guía de uso completa en [`GUIA-BIBLIOTECARIOS.md`](GUIA-BIBLIOTECARIOS.md).
+
 ## Cómo correrlo
 
 ```powershell
